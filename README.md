@@ -1,3 +1,5 @@
 # KeyValueTypesComprasion
 
-Dictionary, Hashtable, Hashset, List, ConcurrentDictionary, SortedDictionary comprasion.
+Dictionary, Hashtable, Hashset comprasion.
+
+http://github.furkankartal.com/keyvaluetypescomprasion
