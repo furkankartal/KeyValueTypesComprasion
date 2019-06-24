@@ -5,17 +5,19 @@
 @section Scripts {
     <script>
         $(function(){
-              $('#result-table').DataTable({
-                  paging: false,
-                  searching: false
-              });
+            $('[data-toggle="tooltip"]').tooltip();
+            $('#result-table').DataTable({
+                paging: false,
+                searching: false
+            });
         });
     </script>
 }
 <h3>KeyValueTypesComprasion</h3>
 <p>
+
     <!-- Dictionary, Hashtable, Hashset, List, ConcurrentDictionary, SortedDictionary comprasion. -->
-    @(string.Join(", ", Model.ResultItemList.Select(s=>s.TypeName))) comprasion in @(Model.RequestCount.ToString("N0")) records. (Page Load: @(Model.ResponseTime) ms)
+    @(string.Join(", ", Model.ResultItemList.Select(s=>s.TypeName))) comprasion in @(Model.RequestCount.ToString("N0")) records. <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="For more, use the 'size' parameter. (?size=1000)"></i>
 </p>
 
   <div class="table-responsive">
@@ -48,3 +50,4 @@
       </tbody>
     </table>
 </div>
+<p>Page Load: @(Model.ResponseTime) ms</p>
