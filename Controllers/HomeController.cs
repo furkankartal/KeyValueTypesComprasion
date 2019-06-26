@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using KeyValueTypesComprasion.Models;
 using System.Collections;
+using System.Collections.Concurrent;
 
 namespace KeyValueTypesComprasion.Controllers
 {
@@ -39,7 +40,10 @@ namespace KeyValueTypesComprasion.Controllers
             var taskArray = new Task<ResultItemModel>[] {
                 Task.Run(() => GetHashtableResult(resultModel.RequestCount)),
                 Task.Run(() => GetHashsetResult(resultModel.RequestCount)),
-                Task.Run(() => GetDictionaryResult(resultModel.RequestCount))
+                Task.Run(() => GetDictionaryResult(resultModel.RequestCount)),
+                Task.Run(() => GetConcurrentDictionaryResult(resultModel.RequestCount)),
+                Task.Run(() => GetSortedDictionaryResult(resultModel.RequestCount)),
+                Task.Run(() => GetListResult(resultModel.RequestCount))
             };
 
             Task.WaitAll(taskArray);
@@ -150,12 +154,12 @@ namespace KeyValueTypesComprasion.Controllers
             var sw = new Stopwatch();
             sw.Start();
 
-            var dictionary = new Dictionary<MyObject, bool>();
+            var dictionary = new Dictionary<string, MyObject>();
 
             // Add
             for (int i = 0; i < size; i++)
             {
-                dictionary.Add(dummyObjects[i], true);
+                dictionary.Add(i.ToString(), dummyObjects[i]);
             }
             var dAddTime = sw.Elapsed.TotalMilliseconds;
 
@@ -164,7 +168,7 @@ namespace KeyValueTypesComprasion.Controllers
             sw.Start();
             for (int i = 0; i < size; i++)
             {
-                dictionary.ContainsKey(dummyObjects[i]);
+                dictionary.ContainsKey(i.ToString());
             }
             var dContainsTime = sw.Elapsed.TotalMilliseconds;
 
@@ -173,7 +177,7 @@ namespace KeyValueTypesComprasion.Controllers
             sw.Start();
             for (int i = 0; i < size; i++)
             {
-                dictionary.Remove(dummyObjects[i]);
+                dictionary.Remove(i.ToString());
             }
             var dRemoveTime = sw.Elapsed.TotalMilliseconds;
 
@@ -188,6 +192,135 @@ namespace KeyValueTypesComprasion.Controllers
             });
         }
 
+        public async Task<ResultItemModel> GetConcurrentDictionaryResult(int size)
+        {
+            var sw = new Stopwatch();
+            sw.Start();
+
+            var cDictionary = new ConcurrentDictionary<string, MyObject>();
+
+            // Add
+            for (int i = 0; i < size; i++)
+            {
+                cDictionary.TryAdd(i.ToString(), dummyObjects[i]);
+            }
+            var cdAddTime = sw.Elapsed.TotalMilliseconds;
+
+            // Contains
+            sw.Reset();
+            sw.Start();
+            for (int i = 0; i < size; i++)
+            {
+                cDictionary.ContainsKey(i.ToString());
+            }
+            var cdContainsTime = sw.Elapsed.TotalMilliseconds;
+
+            // Remove
+            sw.Reset();
+            sw.Start();
+            for (int i = 0; i < size; i++)
+            {
+                MyObject obj;
+                cDictionary.TryRemove(i.ToString(), out obj);
+            }
+            var cdRemoveTime = sw.Elapsed.TotalMilliseconds;
+
+            sw.Stop();
+            // Result
+            return await Task.Run(() => new ResultItemModel
+            {
+                TypeName = "ConcurrentDictionary",
+                AddTime = cdAddTime,
+                ContainsTime = cdContainsTime,
+                RemoveTime = cdRemoveTime
+            });
+        }
+
+        public async Task<ResultItemModel> GetSortedDictionaryResult(int size)
+        {
+            var sw = new Stopwatch();
+            sw.Start();
+
+            var sDictionary = new SortedDictionary<string, MyObject>();
+
+            // Add
+            for (int i = 0; i < size; i++)
+            {
+                sDictionary.Add(i.ToString(), dummyObjects[i]);
+            }
+            var sdAddTime = sw.Elapsed.TotalMilliseconds;
+
+            // Contains
+            sw.Reset();
+            sw.Start();
+            for (int i = 0; i < size; i++)
+            {
+                sDictionary.ContainsKey(i.ToString());
+            }
+            var sdContainsTime = sw.Elapsed.TotalMilliseconds;
+
+            // Remove
+            sw.Reset();
+            sw.Start();
+            for (int i = 0; i < size; i++)
+            {
+                sDictionary.Remove(i.ToString());
+            }
+            var sdRemoveTime = sw.Elapsed.TotalMilliseconds;
+
+            sw.Stop();
+            // Result
+            return await Task.Run(() => new ResultItemModel
+            {
+                TypeName = "SortedDictionary",
+                AddTime = sdAddTime,
+                ContainsTime = sdContainsTime,
+                RemoveTime = sdRemoveTime
+            });
+        }
+
+        public async Task<ResultItemModel> GetListResult(int size)
+        {
+            var sw = new Stopwatch();
+            sw.Start();
+
+            var list = new List<MyObject>();
+
+            // Add
+            for (int i = 0; i < size; i++)
+            {
+                list.Add(dummyObjects[i]);
+            }
+            var lAddTime = sw.Elapsed.TotalMilliseconds;
+
+            // Contains
+            sw.Reset();
+            sw.Start();
+            for (int i = 0; i < size; i++)
+            {
+                list.Contains(dummyObjects[i]);
+            }
+            var lContainsTime = sw.Elapsed.TotalMilliseconds;
+
+            // Remove
+            sw.Reset();
+            sw.Start();
+            for (int i = 0; i < size; i++)
+            {
+                list.Remove(dummyObjects[i]);
+            }
+            var lRemoveTime = sw.Elapsed.TotalMilliseconds;
+
+            sw.Stop();
+            // Result
+            return await Task.Run(() => new ResultItemModel
+            {
+                TypeName = "List",
+                AddTime = lAddTime,
+                ContainsTime = lContainsTime,
+                RemoveTime = lRemoveTime
+            });
+        }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error() => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
