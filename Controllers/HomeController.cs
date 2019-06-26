@@ -20,7 +20,7 @@ namespace KeyValueTypesComprasion.Controllers
 
         }
 
-        public IActionResult Index(int size = 100000)
+        public IActionResult Index(int size = 1000)
         {
             var sw = new Stopwatch();
             sw.Start();
