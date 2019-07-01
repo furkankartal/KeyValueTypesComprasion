@@ -20,15 +20,21 @@ namespace KeyValueTypesComprasion.Controllers
 
         }
 
-        public IActionResult Index(int size = 1000)
+        public IActionResult Index(int size = 5000)
         {
-            var sw = new Stopwatch();
-            sw.Start();
-
             var resultModel = new ResultModel
             {
                 RequestCount = size
             };
+
+            if (size > 1000001)
+            {
+                resultModel.HasError = true;
+                return View(resultModel);
+            }
+
+            var sw = new Stopwatch();
+            sw.Start();
 
             dummyValue = new MyObject();
             dummyObjects = new MyObject[resultModel.RequestCount];
@@ -77,6 +83,9 @@ namespace KeyValueTypesComprasion.Controllers
             }
             var htAddTime = sw.Elapsed.TotalMilliseconds;
 
+            // TryAdd
+            var htTryAddTime = -1;
+
             // Contains
             sw.Reset();
             sw.Start();
@@ -85,6 +94,15 @@ namespace KeyValueTypesComprasion.Controllers
                 hashtable.Contains(dummyObjects[i]);
             }
             var htContainsTime = sw.Elapsed.TotalMilliseconds;
+
+            // FindIndex
+            sw.Reset();
+            sw.Start();
+            for (int i = 0; i < size; i++)
+            {
+                var a = hashtable[dummyObjects[i]];
+            }
+            var htFindIndexTime = sw.Elapsed.TotalMilliseconds;
 
             // Remove
             sw.Reset();
@@ -95,16 +113,23 @@ namespace KeyValueTypesComprasion.Controllers
             }
             var htRemoveTime = sw.Elapsed.TotalMilliseconds;
 
+            // TryGetValue
+            var htTryGetValueTime = -1;
+
             sw.Stop();
             // Result
             return await Task.Run(() => new ResultItemModel
             {
                 TypeName = "Hashtable",
                 AddTime = htAddTime,
+                TryAddTime = htTryAddTime,
                 ContainsTime = htContainsTime,
+                FindIndexTime = htFindIndexTime,
+                TryGetValueTime = htTryGetValueTime,
                 RemoveTime = htRemoveTime
             });
         }
+
 
         public async Task<ResultItemModel> GetHashsetResult(int size)
         {
@@ -120,6 +145,9 @@ namespace KeyValueTypesComprasion.Controllers
             }
             var hsAddTime = sw.Elapsed.TotalMilliseconds;
 
+            // TryAdd
+            var hsTryAddTime = -1;
+
             // Contains
             sw.Reset();
             sw.Start();
@@ -128,6 +156,19 @@ namespace KeyValueTypesComprasion.Controllers
                 hashset.Contains(dummyObjects[i]);
             }
             var hsContainsTime = sw.Elapsed.TotalMilliseconds;
+
+            // FindIndex
+            var hsFindIndexTime = -1;
+
+            // TryGetValue
+            sw.Reset();
+            sw.Start();
+            for (int i = 0; i < size; i++)
+            {
+                MyObject a;
+                hashset.TryGetValue(dummyObjects[i], out a);
+            }
+            var hsTryGetValueTime = sw.Elapsed.TotalMilliseconds;
 
             // Remove
             sw.Reset();
@@ -144,7 +185,10 @@ namespace KeyValueTypesComprasion.Controllers
             {
                 TypeName = "HashSet",
                 AddTime = hsAddTime,
+                TryAddTime = hsTryAddTime,
                 ContainsTime = hsContainsTime,
+                FindIndexTime = hsFindIndexTime,
+                TryGetValueTime = hsTryGetValueTime,
                 RemoveTime = hsRemoveTime
             });
         }
@@ -154,30 +198,56 @@ namespace KeyValueTypesComprasion.Controllers
             var sw = new Stopwatch();
             sw.Start();
 
-            var dictionary = new Dictionary<string, MyObject>();
+            var dictionary = new Dictionary<int, MyObject>();
 
             // Add
             for (int i = 0; i < size; i++)
             {
-                dictionary.Add(i.ToString(), dummyObjects[i]);
+                dictionary.Add(i, dummyObjects[i]);
             }
             var dAddTime = sw.Elapsed.TotalMilliseconds;
+
+            // TryAdd
+            for (int i = 0; i < size; i++)
+            {
+                dictionary.TryAdd(i, dummyObjects[i]);
+            }
+            var dTryAddTime = sw.Elapsed.TotalMilliseconds;
 
             // Contains
             sw.Reset();
             sw.Start();
             for (int i = 0; i < size; i++)
             {
-                dictionary.ContainsKey(i.ToString());
+                dictionary.ContainsKey(i);
             }
             var dContainsTime = sw.Elapsed.TotalMilliseconds;
+
+            // FindIndex
+            sw.Reset();
+            sw.Start();
+            for (int i = 0; i < size; i++)
+            {
+                var a = dictionary[i];
+            }
+            var dFindIndexTime = sw.Elapsed.TotalMilliseconds;
+
+            // TryGetValue
+            sw.Reset();
+            sw.Start();
+            for (int i = 0; i < size; i++)
+            {
+                MyObject a;
+                dictionary.TryGetValue(i, out a);
+            }
+            var dTryGetValueTime = sw.Elapsed.TotalMilliseconds;
 
             // Remove
             sw.Reset();
             sw.Start();
             for (int i = 0; i < size; i++)
             {
-                dictionary.Remove(i.ToString());
+                dictionary.Remove(i);
             }
             var dRemoveTime = sw.Elapsed.TotalMilliseconds;
 
@@ -187,7 +257,10 @@ namespace KeyValueTypesComprasion.Controllers
             {
                 TypeName = "Dictionary",
                 AddTime = dAddTime,
+                TryAddTime = dTryAddTime,
                 ContainsTime = dContainsTime,
+                FindIndexTime = dFindIndexTime,
+                TryGetValueTime = dTryGetValueTime,
                 RemoveTime = dRemoveTime
             });
         }
@@ -197,23 +270,45 @@ namespace KeyValueTypesComprasion.Controllers
             var sw = new Stopwatch();
             sw.Start();
 
-            var cDictionary = new ConcurrentDictionary<string, MyObject>();
+            var cDictionary = new ConcurrentDictionary<int, MyObject>();
+
+            // Add
+            var cdAddTime = -1;
 
             // Add
             for (int i = 0; i < size; i++)
             {
-                cDictionary.TryAdd(i.ToString(), dummyObjects[i]);
+                cDictionary.TryAdd(i, dummyObjects[i]);
             }
-            var cdAddTime = sw.Elapsed.TotalMilliseconds;
+            var cdTryAddTime = sw.Elapsed.TotalMilliseconds;
 
             // Contains
             sw.Reset();
             sw.Start();
             for (int i = 0; i < size; i++)
             {
-                cDictionary.ContainsKey(i.ToString());
+                cDictionary.ContainsKey(i);
             }
             var cdContainsTime = sw.Elapsed.TotalMilliseconds;
+
+            // FindIndex
+            sw.Reset();
+            sw.Start();
+            for (int i = 0; i < size; i++)
+            {
+                var a = cDictionary[i];
+            }
+            var cdFindIndexTime = sw.Elapsed.TotalMilliseconds;
+
+            // TryGetValue
+            sw.Reset();
+            sw.Start();
+            for (int i = 0; i < size; i++)
+            {
+                MyObject a;
+                cDictionary.TryGetValue(i, out a);
+            }
+            var cdTryGetValueTime = sw.Elapsed.TotalMilliseconds;
 
             // Remove
             sw.Reset();
@@ -221,7 +316,7 @@ namespace KeyValueTypesComprasion.Controllers
             for (int i = 0; i < size; i++)
             {
                 MyObject obj;
-                cDictionary.TryRemove(i.ToString(), out obj);
+                cDictionary.TryRemove(i, out obj);
             }
             var cdRemoveTime = sw.Elapsed.TotalMilliseconds;
 
@@ -231,7 +326,10 @@ namespace KeyValueTypesComprasion.Controllers
             {
                 TypeName = "ConcurrentDictionary",
                 AddTime = cdAddTime,
+                TryAddTime = cdTryAddTime,
                 ContainsTime = cdContainsTime,
+                FindIndexTime = cdFindIndexTime,
+                TryGetValueTime = cdTryGetValueTime,
                 RemoveTime = cdRemoveTime
             });
         }
@@ -241,30 +339,56 @@ namespace KeyValueTypesComprasion.Controllers
             var sw = new Stopwatch();
             sw.Start();
 
-            var sDictionary = new SortedDictionary<string, MyObject>();
+            var sDictionary = new SortedDictionary<int, MyObject>();
 
             // Add
             for (int i = 0; i < size; i++)
             {
-                sDictionary.Add(i.ToString(), dummyObjects[i]);
+                sDictionary.Add(i, dummyObjects[i]);
             }
             var sdAddTime = sw.Elapsed.TotalMilliseconds;
+
+            // TryAdd
+            for (int i = 0; i < size; i++)
+            {
+                sDictionary.TryAdd(i, dummyObjects[i]);
+            }
+            var sdTryAddTime = sw.Elapsed.TotalMilliseconds;
 
             // Contains
             sw.Reset();
             sw.Start();
             for (int i = 0; i < size; i++)
             {
-                sDictionary.ContainsKey(i.ToString());
+                sDictionary.ContainsKey(i);
             }
             var sdContainsTime = sw.Elapsed.TotalMilliseconds;
+
+            // FindIndex
+            sw.Reset();
+            sw.Start();
+            for (int i = 0; i < size; i++)
+            {
+                var a = sDictionary[i];
+            }
+            var sdFindIndexTime = sw.Elapsed.TotalMilliseconds;
+
+            // TryGetValue
+            sw.Reset();
+            sw.Start();
+            for (int i = 0; i < size; i++)
+            {
+                MyObject a;
+                sDictionary.TryGetValue(i, out a);
+            }
+            var sdTryGetValueTime = sw.Elapsed.TotalMilliseconds;
 
             // Remove
             sw.Reset();
             sw.Start();
             for (int i = 0; i < size; i++)
             {
-                sDictionary.Remove(i.ToString());
+                sDictionary.Remove(i);
             }
             var sdRemoveTime = sw.Elapsed.TotalMilliseconds;
 
@@ -274,7 +398,10 @@ namespace KeyValueTypesComprasion.Controllers
             {
                 TypeName = "SortedDictionary",
                 AddTime = sdAddTime,
+                TryAddTime = sdTryAddTime,
                 ContainsTime = sdContainsTime,
+                FindIndexTime = sdFindIndexTime,
+                TryGetValueTime = sdTryGetValueTime,
                 RemoveTime = sdRemoveTime
             });
         }
@@ -293,6 +420,9 @@ namespace KeyValueTypesComprasion.Controllers
             }
             var lAddTime = sw.Elapsed.TotalMilliseconds;
 
+            // TryAdd
+            var lTryAddTime = -1;
+
             // Contains
             sw.Reset();
             sw.Start();
@@ -301,6 +431,18 @@ namespace KeyValueTypesComprasion.Controllers
                 list.Contains(dummyObjects[i]);
             }
             var lContainsTime = sw.Elapsed.TotalMilliseconds;
+
+            // FindIndex
+            sw.Reset();
+            sw.Start();
+            for (int i = 0; i < size; i++)
+            {
+                var a = list[i];
+            }
+            var lFindIndexTime = sw.Elapsed.TotalMilliseconds;
+
+            // TryGetValue
+            var lTryGetValueTime = -1;
 
             // Remove
             sw.Reset();
@@ -317,7 +459,10 @@ namespace KeyValueTypesComprasion.Controllers
             {
                 TypeName = "List",
                 AddTime = lAddTime,
+                TryAddTime = lTryAddTime,
                 ContainsTime = lContainsTime,
+                FindIndexTime = lFindIndexTime,
+                TryGetValueTime = lTryGetValueTime,
                 RemoveTime = lRemoveTime
             });
         }

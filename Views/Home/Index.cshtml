@@ -14,10 +14,13 @@
     </script>
 }
 <h3>KeyValueTypesComprasion</h3>
+@if (Model.HasError) {
+<p>An error occurred.</p>
+} else {
 <p>
 
     <!-- Dictionary, Hashtable, Hashset, List, ConcurrentDictionary, SortedDictionary comprasion. -->
-    @(string.Join(", ", Model.ResultItemList.Select(s=>s.TypeName))) comprasion in @(Model.RequestCount.ToString("N0")) records. <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="For more, use the 'size' parameter. (?size=1000)"></i>
+    @(string.Join(", ", Model.ResultItemList.Select(s=>s.TypeName))) comprasion in @(Model.RequestCount.ToString("N0")) records. <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="For more, use the 'size' parameter. (?size=10000)"></i>
 </p>
 
   <div class="table-responsive">
@@ -26,7 +29,10 @@
         <tr>
           <th class="align-top" scope="col">Type</th>
           <th class="text-center" scope="col">Add</th>
+          <th class="text-center" scope="col">TryAdd</th>
           <th class="text-center" scope="col">Contains</th>
+          <th class="text-center" scope="col">Find Index/Key</th>
+          <th class="text-center" scope="col">TryGetValue</th>
           <th class="text-center" scope="col">Remove</th>
         </tr>
       </thead>
@@ -40,7 +46,16 @@
               <p>@(resultItem.AddTime) ms</p>
             </td>
             <td class="text-center">
+              <p>@(resultItem.TryAddTime) ms</p>
+            </td>
+            <td class="text-center">
               <p>@(resultItem.ContainsTime) ms</p>
+            </td>
+            <td class="text-center">
+              <p>@(resultItem.FindIndexTime) ms</p>
+            </td>
+            <td class="text-center">
+              <p>@(resultItem.TryGetValueTime) ms</p>
             </td>
             <td class="text-center">
               <p>@(resultItem.RemoveTime) ms</p>
@@ -51,3 +66,6 @@
     </table>
 </div>
 <p>Page Load: @(Model.ResponseTime) ms</p>
+<br />
+<p>* "-1 ms" değeri ilgili tip için, ilgili metod karşılığının bulunmamasından dolayı ölçümleme yapılmadığını belirtir.</p>
+}

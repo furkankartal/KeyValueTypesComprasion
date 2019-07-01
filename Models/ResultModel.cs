@@ -8,6 +8,7 @@ namespace KeyValueTypesComprasion.Models
         public List<ResultItemModel> ResultItemList { get; set; }
         public int RequestCount { get; set; }
         public double ResponseTime { get; set; }
+        public bool HasError { get; set; }
 
         public ResultModel()
         {
