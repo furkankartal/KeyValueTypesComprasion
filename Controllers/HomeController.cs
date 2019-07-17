@@ -20,7 +20,7 @@ namespace KeyValueTypesComprasion.Controllers
 
         }
 
-        public IActionResult Index(int size = 5000)
+        public IActionResult Index(int size = 1000)
         {
             var resultModel = new ResultModel
             {
@@ -49,7 +49,8 @@ namespace KeyValueTypesComprasion.Controllers
                 Task.Run(() => GetDictionaryResult(resultModel.RequestCount)),
                 Task.Run(() => GetConcurrentDictionaryResult(resultModel.RequestCount)),
                 Task.Run(() => GetSortedDictionaryResult(resultModel.RequestCount)),
-                Task.Run(() => GetListResult(resultModel.RequestCount))
+                Task.Run(() => GetListResult(resultModel.RequestCount)),
+                Task.Run(() => GetSortedListResult(resultModel.RequestCount))
             };
 
             Task.WaitAll(taskArray);
@@ -208,6 +209,8 @@ namespace KeyValueTypesComprasion.Controllers
             var dAddTime = sw.Elapsed.TotalMilliseconds;
 
             // TryAdd
+            sw.Reset();
+            sw.Start();
             for (int i = 0; i < size; i++)
             {
                 dictionary.TryAdd(i, dummyObjects[i]);
@@ -275,7 +278,7 @@ namespace KeyValueTypesComprasion.Controllers
             // Add
             var cdAddTime = -1;
 
-            // Add
+            // TryAdd
             for (int i = 0; i < size; i++)
             {
                 cDictionary.TryAdd(i, dummyObjects[i]);
@@ -349,6 +352,8 @@ namespace KeyValueTypesComprasion.Controllers
             var sdAddTime = sw.Elapsed.TotalMilliseconds;
 
             // TryAdd
+            sw.Reset();
+            sw.Start();
             for (int i = 0; i < size; i++)
             {
                 sDictionary.TryAdd(i, dummyObjects[i]);
@@ -467,8 +472,83 @@ namespace KeyValueTypesComprasion.Controllers
             });
         }
 
+        public async Task<ResultItemModel> GetSortedListResult(int size)
+        {
+            var sw = new Stopwatch();
+            sw.Start();
+
+            var sortedList = new SortedList<int, MyObject>();
+
+            // Add
+            for (int i = 0; i < size; i++)
+            {
+                sortedList.Add(i, dummyObjects[i]);
+            }
+            var lAddTime = sw.Elapsed.TotalMilliseconds;
+
+            // TryAdd
+            sw.Reset();
+            sw.Start();
+            for (int i = 0; i < size; i++)
+            {
+                sortedList.TryAdd(i, dummyObjects[i]);
+            }
+            var lTryAddTime = sw.Elapsed.TotalMilliseconds;
+
+            // Contains
+            sw.Reset();
+            sw.Start();
+            for (int i = 0; i < size; i++)
+            {
+                sortedList.ContainsKey(i);
+            }
+            var lContainsTime = sw.Elapsed.TotalMilliseconds;
+
+            // FindIndex
+            sw.Reset();
+            sw.Start();
+            for (int i = 0; i < size; i++)
+            {
+                var a = sortedList[i];
+            }
+            var lFindIndexTime = sw.Elapsed.TotalMilliseconds;
+
+            // TryGetValue
+            sw.Reset();
+            sw.Start();
+            for (int i = 0; i < size; i++)
+            {
+                MyObject a;
+                sortedList.TryGetValue(i, out a);
+            }
+            var lTryGetValueTime = sw.Elapsed.TotalMilliseconds;
+
+            // Remove
+            sw.Reset();
+            sw.Start();
+            for (int i = 0; i < size; i++)
+            {
+                sortedList.Remove(i);
+            }
+            var lRemoveTime = sw.Elapsed.TotalMilliseconds;
+
+            sw.Stop();
+            // Result
+            return await Task.Run(() => new ResultItemModel
+            {
+                TypeName = "SortedList",
+                AddTime = lAddTime,
+                TryAddTime = lTryAddTime,
+                ContainsTime = lContainsTime,
+                FindIndexTime = lFindIndexTime,
+                TryGetValueTime = lTryGetValueTime,
+                RemoveTime = lRemoveTime
+            });
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error() => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 
     }
+
 }
