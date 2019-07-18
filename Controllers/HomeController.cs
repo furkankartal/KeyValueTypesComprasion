@@ -92,7 +92,7 @@ namespace KeyValueTypesComprasion.Controllers
             sw.Start();
             for (int i = 0; i < size; i++)
             {
-                hashtable.Contains(dummyObjects[i]);
+                hashtable.ContainsKey(i);
             }
             var htContainsTime = sw.Elapsed.TotalMilliseconds;
 
