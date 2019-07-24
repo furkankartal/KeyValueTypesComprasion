@@ -1,0 +1,45 @@
+﻿@model DetailResultModel
+@{
+    ViewData["Title"] = "Home Page";
+}
+@section Scripts {
+    <script>
+        $(function(){
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
+}
+<h3>ConcurrentDictionary, Dictionary Comprasion</h3>
+@if (Model.HasError) {
+<p>An error occurred.</p>
+} else {
+
+  <div class="table-responsive">
+    <table id="result-table" class="table table-striped">
+      <thead>
+        <tr>
+          <th class="align-top" scope="col">Step</th>
+          <th class="align-top" scope="col">Type</th>
+          <th class="align-top" scope="col">Value</th>
+          <th class="text-center" scope="col">Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        @foreach(var gResult in Model.ResultItemList.GroupBy(g=>g.Step))
+        {
+          foreach(var gResultItem in gResult){
+            <tr>
+              <th scope="row">@(gResult.Key)</th>
+              <th scope="row">@(gResultItem.Type)</th>
+              <th scope="row">@(gResultItem.Value)</th>
+              <td class="text-center">
+                <p>@(gResultItem.Time) ms</p>
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+</div>
+<p>Page Load: @(Model.ResponseTime) ms</p>
+}
